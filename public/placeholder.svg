@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1067" viewBox="0 0 800 1067">
+  <!-- Dark surface background -->
+  <rect width="800" height="1067" fill="#0C0A09" />
+  
+  <!-- Subtle gold border -->
+  <rect x="20" y="20" width="760" height="1027" fill="none" stroke="#D4AF37" stroke-width="2" stroke-opacity="0.3" />
+
+  <!-- Center icon (Image placeholder) -->
+  <g transform="translate(360, 490)" fill="none" stroke="#D4AF37" stroke-width="4" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-40" y="-40" width="160" height="160" rx="10" />
+    <circle cx="10" cy="10" r="16" />
+    <path d="M-40 80 L20 20 L80 80 L120 40 L120 120 M-40 120 L120 120" />
+  </g>
+
+  <!-- Brand text or message -->
+  <text x="400" y="700" text-anchor="middle" font-family="serif" font-size="28" fill="#D4AF37" opacity="0.6" letter-spacing="2">NOIR &amp; GOLD</text>
+</svg>

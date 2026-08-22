@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Storefront (dark) */
+    --background: 0 0% 4%;           /* #0B0B0B */
+    --background-alt: 0 0% 8%;       /* #141414 */
+    --surface: 0 0% 10%;             /* #1A1A1A */
+    --surface-border: 45 55% 51% / 0.15;  /* gold hairline @ 15% */
+    --foreground: 42 38% 92%;        /* #F5F1E8 ivory */
+    --muted-foreground: 40 6% 63%;   /* #A8A29A */
+    --gold: 46 65% 52%;              /* #D4AF37 — primary accent */
+    --gold-muted: 43 55% 60%;        /* #C9A94E — large fills (buttons) */
+    --gold-bright: 45 78% 71%;       /* #E8C766 — micro-accents/glow only */
+    --destructive: 6 46% 49%;        /* #C1443A — muted brick red */
+    --success: 132 21% 39%;          /* #4C7A5A — muted sage */
+    --radius: 0.5rem;
+
+    /* Skeuomorphic depth & textures */
+    --shadow-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 4px rgba(0, 0, 0, 0.6);
+    --shadow-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+    --shadow-surface: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 24px rgba(0, 0, 0, 0.8);
+    --bg-fabric: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    --gold-foil: linear-gradient(110deg, #D4AF37 0%, #F5E7B8 50%, #D4AF37 100%);
+    /* shadcn mappings */
+    --card: 0 0% 10%;
+    --card-foreground: 42 38% 92%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 42 38% 92%;
+    --primary: 46 65% 52%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 42 38% 92%;
+    --muted: 0 0% 8%;
+    --accent: 0 0% 8%;
+    --accent-foreground: 42 38% 92%;
+    --border: 45 55% 51% / 0.15;
+    --input: 45 55% 51% / 0.15;
+    --ring: 46 65% 52%;
+  }
+
+  .admin {
+    --background: 40 33% 97%;        /* #FAF8F3 */
+    --surface: 0 0% 100%;
+    --foreground: 0 0% 10%;          /* #1A1A1A */
+    --muted-foreground: 0 0% 40%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 46 65% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 33% 95%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 40 33% 95%;
+    --accent: 40 33% 95%;
+    --accent-foreground: 0 0% 10%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 46 65% 52%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
