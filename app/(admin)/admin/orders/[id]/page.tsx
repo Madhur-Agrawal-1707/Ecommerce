@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { OrderTimeline } from "@/components/admin/order-timeline";
 import { PrintOrderButton } from "@/components/admin/print-order-button";
+import { RefundHoldToggle } from "@/components/admin/refund-hold-toggle";
 import {
   Table,
   TableBody,
@@ -205,6 +206,13 @@ export default async function OrderDetailPage({
                   <p className="font-mono text-xs bg-muted p-1 rounded">{order.razorpay_payment_id}</p>
                 </div>
               )}
+              
+              <RefundHoldToggle 
+                orderId={order.id} 
+                initialHoldStatus={order.hold_refund} 
+                isCancelled={order.fulfillment_status === "cancelled"} 
+                paymentStatus={order.payment_status} 
+              />
             </CardContent>
           </Card>
         </div>

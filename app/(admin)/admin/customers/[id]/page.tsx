@@ -175,7 +175,7 @@ export default async function CustomerDetailPage({
                         </TableCell>
                         <TableCell>
                           <Badge variant={
-                            order.fulfillment_status === "fulfilled" || order.fulfillment_status === "shipped" 
+                            order.fulfillment_status === "delivered" || order.fulfillment_status === "shipped" 
                               ? "default" 
                               : order.fulfillment_status === "cancelled" ? "destructive" : "secondary"
                           }>

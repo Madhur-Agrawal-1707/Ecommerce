@@ -12,10 +12,10 @@ import {
 export function DashboardDateToggle() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentRange = searchParams.get("range") || "30d";
+  const currentRange = searchParams?.get("range") || "30d";
 
   const handleRangeChange = (value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() || "");
     params.set("range", value);
     router.push(`?${params.toString()}`);
   };

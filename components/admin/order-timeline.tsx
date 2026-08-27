@@ -41,10 +41,15 @@ export function OrderTimeline({
       // Get current user for created_by
       const { data: { session } } = await supabase.auth.getSession();
       
+      const updatePayload: any = { fulfillment_status: status };
+      if (status === "cancelled") {
+        updatePayload.cancelled_at = new Date().toISOString();
+      }
+
       // Update order status
       const { error: orderError } = await supabase
         .from("orders")
-        .update({ fulfillment_status: status })
+        .update(updatePayload)
         .eq("id", orderId);
 
       if (orderError) throw orderError;
@@ -88,7 +93,7 @@ export function OrderTimeline({
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="processing">Processing</SelectItem>
                 <SelectItem value="shipped">Shipped</SelectItem>
-                <SelectItem value="fulfilled">Fulfilled</SelectItem>
+                <SelectItem value="delivered">Delivered</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>

@@ -33,7 +33,7 @@ export function VariantSelector({ product, variants }: { product: any, variants:
     if (isOutOfStock) return
 
     if (!user) {
-      router.push(`/auth/sign-in?next=${encodeURIComponent(pathname)}`)
+      router.push(`/auth/sign-in?next=${encodeURIComponent(pathname || "")}`)
       return
     }
 

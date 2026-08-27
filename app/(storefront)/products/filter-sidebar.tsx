@@ -18,7 +18,7 @@ export function FilterSidebar() {
   const searchParams = useSearchParams()
 
   const handleFilter = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams?.toString() || "")
     
     // Toggle logic for multiple selection (simplified to single for now, or toggle)
     if (params.get(key) === value) {
@@ -31,7 +31,7 @@ export function FilterSidebar() {
   }
 
   const handleSort = (value: string) => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams?.toString() || "")
     params.set("sort", value)
     router.replace(`/products?${params.toString()}`, { scroll: false })
   }
@@ -42,7 +42,7 @@ export function FilterSidebar() {
         <h3 className="font-serif text-lg text-foreground mb-4">Sort By</h3>
         <select
           className="w-full bg-surface border border-border text-foreground text-sm rounded-md px-3 py-2 focus:ring-1 focus:ring-gold outline-none shadow-emboss transition-shadow"
-          value={searchParams.get("sort") || "newest"}
+          value={searchParams?.get("sort") || "newest"}
           onChange={(e) => handleSort(e.target.value)}
         >
           <option value="newest">Newest Arrivals</option>
@@ -60,7 +60,7 @@ export function FilterSidebar() {
             <AccordionContent>
               <div className="flex flex-col gap-2 pt-2">
                 {options.map((option) => {
-                  const isActive = searchParams.get(key) === option.toLowerCase()
+                  const isActive = searchParams?.get(key) === option.toLowerCase()
                   return (
                     <button
                       key={option}
@@ -83,11 +83,11 @@ export function FilterSidebar() {
         ))}
       </Accordion>
       
-      {(searchParams.get("fabric") || searchParams.get("occasion")) && (
+      {(searchParams?.get("fabric") || searchParams?.get("occasion")) && (
         <Button 
           variant="outline" 
           onClick={() => {
-            const params = new URLSearchParams(searchParams.toString())
+            const params = new URLSearchParams(searchParams?.toString() || "")
             params.delete("fabric")
             params.delete("occasion")
             router.replace(`/products?${params.toString()}`, { scroll: false })

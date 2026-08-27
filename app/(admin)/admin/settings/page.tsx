@@ -12,11 +12,12 @@ export default async function SettingsPage() {
   const supabase = createClient();
   
   // Upsert or fetch site settings (id=1)
-  let { data: settings, error } = await supabase
+  const { data, error } = await supabase
     .from("site_settings")
     .select("*")
     .eq("id", 1)
     .single();
+  let settings = data;
 
   if (!settings && !error) {
     // If not exists, create the default record

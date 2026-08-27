@@ -22,6 +22,9 @@ export function CartDrawer() {
     () => {
       if (!overlayRef.current || !panelRef.current) return
 
+      gsap.set(overlayRef.current, { autoAlpha: 0 })
+      gsap.set(panelRef.current, { xPercent: 100 })
+
       tlRef.current = gsap
         .timeline({ paused: true })
         .to(overlayRef.current, {
@@ -68,8 +71,7 @@ export function CartDrawer() {
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50"
-      style={{ visibility: "hidden", opacity: 0 }}
+      className="fixed inset-0 z-50 invisible opacity-0"
       aria-hidden={!isOpen}
     >
       {/* Backdrop */}
@@ -86,7 +88,6 @@ export function CartDrawer() {
         aria-modal="true"
         aria-label="Shopping cart"
         className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-surface border-l border-border shadow-2xl"
-        style={{ transform: "translateX(100%)" }}
       >
         {/* Header */}
         <div className="flex h-16 items-center justify-between border-b border-border px-6">

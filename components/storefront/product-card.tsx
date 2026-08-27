@@ -119,7 +119,7 @@ export function ProductCard({
     e.stopPropagation()
     
     if (!user) {
-      router.push(`/auth/sign-in?next=${encodeURIComponent(pathname)}`)
+      router.push(`/auth/sign-in?next=${encodeURIComponent(pathname || "")}`)
       return
     }
 

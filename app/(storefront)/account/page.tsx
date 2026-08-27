@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import Link from "next/link"
 
 export const metadata = {
   title: "My Account | Noir & Gold",
@@ -31,12 +32,11 @@ export default async function AccountPage() {
         
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8">
           {/* Orders */}
-          <div className="p-6 border border-border rounded-md hover:border-gold transition-colors">
-            <h3 className="font-medium text-lg mb-2">Orders</h3>
+          <Link href="/account/orders" className="block p-6 border border-border rounded-md hover:border-gold transition-colors group">
+            <h3 className="font-medium text-lg mb-2 group-hover:text-gold transition-colors">Orders</h3>
             <p className="text-sm text-muted-foreground mb-4">View your order history and track recent shipments.</p>
-            {/* Note: Full implementation planned for next phase */}
-            <span className="text-sm text-gold">Coming soon</span>
-          </div>
+            <span className="text-sm text-gold font-medium">View Orders &rarr;</span>
+          </Link>
           
           {/* Addresses */}
           <div className="p-6 border border-border rounded-md hover:border-gold transition-colors">

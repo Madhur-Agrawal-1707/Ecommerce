@@ -12,11 +12,12 @@ export default async function SeoPage() {
   const supabase = createClient();
   
   // Upsert or fetch global SEO settings (id=1)
-  let { data: settings, error } = await supabase
+  const { data, error } = await supabase
     .from("seo_settings")
     .select("*")
     .eq("id", 1)
     .single();
+  let settings = data;
 
   if (!settings && !error) {
     const { data: newSettings } = await supabase
