@@ -20,9 +20,9 @@ export default async function StorefrontLayout({
   }))
 
   const navLinks = [
-    ...categoryLinks,
-    { href: "/products?sort=newest", label: "New Arrivals" },
-    { href: "/products?sale=true", label: "Sale" },
+    { href: "/", label: "Home" },
+    { href: "/products?category=saree", label: "Saree" },
+    { href: "/products?category=suits", label: "Suits" },
     { href: "/about", label: "About" },
   ]
 

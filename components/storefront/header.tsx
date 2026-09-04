@@ -29,7 +29,12 @@ export function Header({ navLinks = DEFAULT_NAV_LINKS }: { navLinks?: { href: st
   const { itemCount: wishlistItemCount } = useWishlist()
   const { user, profile } = useAuth()
   const [mobileOpen, setMobileOpen] = React.useState(false)
+  const [mounted, setMounted] = React.useState(false)
   const headerRef = React.useRef<HTMLElement>(null)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useGSAP(
     () => {
@@ -98,8 +103,7 @@ export function Header({ navLinks = DEFAULT_NAV_LINKS }: { navLinks?: { href: st
                 key={href}
                 href={href}
                 className={cn(
-                  "text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors relative group",
-                  label === "Sale" && "text-gold hover:text-gold-bright"
+                  "text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors relative group"
                 )}
               >
                 {label}
@@ -126,7 +130,7 @@ export function Header({ navLinks = DEFAULT_NAV_LINKS }: { navLinks?: { href: st
               className="relative p-2 text-muted-foreground hover:text-foreground transition-colors rounded-md hidden sm:flex"
             >
               <Heart className="h-5 w-5" />
-              {wishlistItemCount > 0 && (
+              {mounted && wishlistItemCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-black">
                   {wishlistItemCount > 9 ? "9+" : wishlistItemCount}
                 </span>
@@ -167,7 +171,7 @@ export function Header({ navLinks = DEFAULT_NAV_LINKS }: { navLinks?: { href: st
               className="relative p-2 text-muted-foreground hover:text-foreground transition-colors rounded-md"
             >
               <ShoppingBag className="h-5 w-5" />
-              {itemCount > 0 && (
+              {mounted && itemCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-black">
                   {itemCount > 9 ? "9+" : itemCount}
                 </span>
