@@ -69,7 +69,7 @@ export default async function OrderDetailPage({
             </p>
           </div>
         </div>
-        <PrintOrderButton />
+        <PrintOrderButton orderId={order.id} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

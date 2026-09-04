@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/context/auth-context"
+import { useWishlist } from "@/context/wishlist-context"
 import { useRouter, usePathname } from "next/navigation"
 
 if (typeof window !== "undefined") {
@@ -57,7 +58,8 @@ export function ProductCard({
   const router = useRouter()
   const pathname = usePathname()
 
-  const [isWishlisted, setIsWishlisted] = React.useState(false)
+  const { isWishlisted: checkIsWishlisted, addItem, removeItem } = useWishlist()
+  const isWishlisted = checkIsWishlisted(id)
 
   useGSAP(
     () => {
@@ -100,8 +102,22 @@ export function ProductCard({
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    const willBeWishlisted = !isWishlisted
-    setIsWishlisted(willBeWishlisted)
+    
+    if (isWishlisted) {
+      removeItem(id)
+    } else {
+      addItem({
+        id,
+        title,
+        slug,
+        price,
+        salePrice,
+        imageMain,
+        imageLifestyle,
+        isNew,
+        stockQuantity,
+      })
+    }
 
     gsap.fromTo(
       heartRef.current,

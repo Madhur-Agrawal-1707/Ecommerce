@@ -8,6 +8,7 @@ import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
 import { useCart } from "@/context/cart-context"
+import { useWishlist } from "@/context/wishlist-context"
 import { useAuth } from "@/context/auth-context"
 import { MobileMenu } from "./mobile-menu"
 import { cn } from "@/lib/utils"
@@ -25,6 +26,7 @@ const DEFAULT_NAV_LINKS = [
 
 export function Header({ navLinks = DEFAULT_NAV_LINKS }: { navLinks?: { href: string; label: string }[] } = {}) {
   const { itemCount, openCart } = useCart()
+  const { itemCount: wishlistItemCount } = useWishlist()
   const { user, profile } = useAuth()
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const headerRef = React.useRef<HTMLElement>(null)
@@ -120,10 +122,15 @@ export function Header({ navLinks = DEFAULT_NAV_LINKS }: { navLinks?: { href: st
             {/* Wishlist */}
             <Link
               href="/account/wishlist"
-              aria-label="Wishlist"
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-md hidden sm:flex"
+              aria-label={`Wishlist (${wishlistItemCount} items)`}
+              className="relative p-2 text-muted-foreground hover:text-foreground transition-colors rounded-md hidden sm:flex"
             >
               <Heart className="h-5 w-5" />
+              {wishlistItemCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-black">
+                  {wishlistItemCount > 9 ? "9+" : wishlistItemCount}
+                </span>
+              )}
             </Link>
 
             {/* Account */}

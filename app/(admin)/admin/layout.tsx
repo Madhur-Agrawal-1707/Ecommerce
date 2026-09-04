@@ -27,14 +27,16 @@ export default async function AdminLayout({
   if (profile?.role !== "admin") redirect("/")
 
   return (
-    <div className="admin flex h-screen overflow-hidden bg-background text-foreground">
+    <div className="admin flex h-screen overflow-hidden bg-background text-foreground print:h-auto print:overflow-visible print:bg-white print:text-black">
       {/* Sidebar */}
-      <AdminSidebar />
+      <div className="print:hidden">
+        <AdminSidebar />
+      </div>
 
       {/* Main content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden print:overflow-visible">
         {/* Top bar */}
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background px-6">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background px-6 print:hidden">
           <div />
           <div className="flex items-center gap-4">
             {/* View storefront */}
@@ -81,7 +83,7 @@ export default async function AdminLayout({
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 print:p-0 print:overflow-visible print:w-full">{children}</main>
       </div>
     </div>
   )
