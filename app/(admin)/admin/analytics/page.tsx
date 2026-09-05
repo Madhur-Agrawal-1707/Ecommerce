@@ -2,18 +2,28 @@ import { createClient } from "@/lib/supabase/server";
 import { RevenueChart } from "@/components/admin/analytics/revenue-chart";
 import { TopProductsChart } from "@/components/admin/analytics/top-products-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DashboardDateToggle } from "@/components/admin/dashboard-date-toggle";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 
 export const metadata = {
   title: "Analytics | Admin Dashboard",
 };
 
-export default async function AnalyticsPage() {
+export default async function AnalyticsPage({
+  searchParams,
+}: {
+  searchParams: { range?: string };
+}) {
   const supabase = createClient();
+  const range = searchParams.range || "30d";
   
-  // Last 30 days
   const endDate = endOfDay(new Date());
-  const startDate = startOfDay(subDays(endDate, 29));
+  let days = 30;
+  if (range === "7d") days = 7;
+  else if (range === "90d") days = 90;
+  else if (range === "1y") days = 365;
+
+  const startDate = startOfDay(subDays(endDate, days - 1));
 
   // 1. Fetch Orders for Revenue chart
   const { data: orders, error: ordersError } = await supabase
@@ -39,19 +49,37 @@ export default async function AnalyticsPage() {
 
   // Aggregate Revenue by Date
   const dailyRevenue: Record<string, number> = {};
-  // Initialize all 30 days to 0
-  for (let i = 0; i < 30; i++) {
-    const d = format(subDays(endDate, 29 - i), "MMM dd");
-    dailyRevenue[d] = 0;
-  }
-
-  if (orders) {
-    orders.forEach(order => {
-      const d = format(new Date(order.created_at), "MMM dd");
-      if (dailyRevenue[d] !== undefined) {
-        dailyRevenue[d] += Number(order.total);
-      }
-    });
+  
+  if (range === "1y") {
+    // Monthly aggregation
+    const months = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(endDate);
+      d.setMonth(d.getMonth() - i);
+      const key = format(d, "MMM yyyy");
+      months.push(key);
+      dailyRevenue[key] = 0;
+    }
+    if (orders) {
+      orders.forEach(order => {
+        const d = format(new Date(order.created_at), "MMM yyyy");
+        if (dailyRevenue[d] !== undefined) dailyRevenue[d] += Number(order.total);
+      });
+    }
+  } else {
+    // Daily aggregation
+    for (let i = 0; i < days; i++) {
+      const d = format(subDays(endDate, days - 1 - i), "MMM dd");
+      dailyRevenue[d] = 0;
+    }
+    if (orders) {
+      orders.forEach(order => {
+        const d = format(new Date(order.created_at), "MMM dd");
+        if (dailyRevenue[d] !== undefined) {
+          dailyRevenue[d] += Number(order.total);
+        }
+      });
+    }
   }
 
   const revenueData = Object.entries(dailyRevenue).map(([date, revenue]) => ({
@@ -88,23 +116,26 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-        <p className="text-muted-foreground">Store performance over the last 30 days.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
+          <p className="text-muted-foreground">Store performance over the selected period.</p>
+        </div>
+        <DashboardDateToggle />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue (30d)</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{totalRevenue.toLocaleString()}</div>
+            <div className="text-2xl font-bold">₹{totalRevenue.toLocaleString("en-IN")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders (30d)</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalOrders}</div>
@@ -115,7 +146,7 @@ export default async function AnalyticsPage() {
             <CardTitle className="text-sm font-medium">Avg Order Value</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{avgOrderValue.toFixed(2)}</div>
+            <div className="text-2xl font-bold">₹{avgOrderValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</div>
           </CardContent>
         </Card>
       </div>

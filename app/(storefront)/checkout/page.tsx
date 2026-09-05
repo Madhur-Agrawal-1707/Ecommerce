@@ -10,7 +10,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { gsap } from "gsap"
 import { useGSAP } from "@gsap/react"
-import { Loader2, CheckCircle2, ChevronRight, Lock } from "lucide-react"
+import { Loader2, CheckCircle2, ChevronRight, Lock, MapPin } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 export default function CheckoutPage() {
   const { user, loading: authLoading } = useAuth()
@@ -20,17 +22,24 @@ export default function CheckoutPage() {
   const [step, setStep] = React.useState<1 | 2 | 3>(1)
   const [isProcessing, setIsProcessing] = React.useState(false)
   
+  // Data
+  const [savedAddresses, setSavedAddresses] = React.useState<any[]>([])
+  const [selectedAddressId, setSelectedAddressId] = React.useState<string>("new")
+  const [isLoadingData, setIsLoadingData] = React.useState(true)
+
   // Form State
   const [shippingAddress, setShippingAddress] = React.useState({
     fullName: "",
     email: "",
     phone: "",
     addressLine1: "",
+    addressLine2: "",
     city: "",
     state: "",
     zip: "",
     country: "India"
   })
+  
   const [couponCode, setCouponCode] = React.useState("")
   const [discount, setDiscount] = React.useState({ amount: 0, code: "" })
   const [couponError, setCouponError] = React.useState("")
@@ -46,15 +55,95 @@ export default function CheckoutPage() {
   }, [user, authLoading, router])
 
   React.useEffect(() => {
-    // Pre-fill user data
-    if (user) {
+    async function loadData() {
+      if (user) {
+        setIsLoadingData(true)
+        try {
+          const supabase = createClient()
+          
+          // Fetch profile and addresses in parallel
+          const [profileRes, addressesRes] = await Promise.all([
+            supabase.from("profiles").select("*").eq("id", user.id).single(),
+            supabase.from("addresses").select("*").eq("user_id", user.id).order("is_default", { ascending: false }).order("created_at", { ascending: false })
+          ])
+          
+          const profile = profileRes.data
+          const addresses = addressesRes.data || []
+          
+          setSavedAddresses(addresses)
+
+          if (addresses.length > 0) {
+            const defaultAddr = addresses.find(a => a.is_default) || addresses[0]
+            setSelectedAddressId(defaultAddr.id)
+            setShippingAddress({
+              fullName: defaultAddr.full_name || "",
+              email: user.email || "",
+              phone: defaultAddr.phone || profile?.phone || "",
+              addressLine1: defaultAddr.address_line1 || "",
+              addressLine2: defaultAddr.address_line2 || "",
+              city: defaultAddr.city || "",
+              state: defaultAddr.state || "",
+              zip: defaultAddr.zip || "",
+              country: defaultAddr.country || "India"
+            })
+          } else {
+             // Populate from profile if no addresses
+             setShippingAddress(prev => ({
+               ...prev,
+               fullName: profile?.full_name || user.user_metadata?.full_name || "",
+               phone: profile?.phone || "",
+               email: user.email || "",
+             }))
+          }
+        } catch (error) {
+          console.error("Error loading user data", error)
+        } finally {
+          setIsLoadingData(false)
+        }
+      } else {
+        setIsLoadingData(false)
+      }
+    }
+    loadData()
+  }, [user])
+
+  const handleAddressSelect = (id: string) => {
+    setSelectedAddressId(id)
+    if (id !== "new") {
+      const addr = savedAddresses.find(a => a.id === id)
+      if (addr) {
+        setShippingAddress(prev => ({
+          ...prev,
+          fullName: addr.full_name || "",
+          phone: addr.phone || prev.phone,
+          addressLine1: addr.address_line1 || "",
+          addressLine2: addr.address_line2 || "",
+          city: addr.city || "",
+          state: addr.state || "",
+          zip: addr.zip || "",
+          country: addr.country || "India"
+        }))
+      }
+    } else {
+      // Clear fields for new address, keep name/email/phone from profile
       setShippingAddress(prev => ({
         ...prev,
-        email: user.email || "",
-        fullName: prev.fullName || user.user_metadata?.full_name || ""
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        state: "",
+        zip: "",
+        country: "India"
       }))
     }
-  }, [user])
+  }
+
+  // When a user types into the form, if they were on a saved address, we optionally switch them to "new" 
+  // or we just let them edit the current fields (it won't overwrite their saved address unless we add a "Save" feature).
+  // For simplicity, we just let them edit the fields. The `shippingAddress` state drives the order.
+  const handleInputChange = (field: string, value: string) => {
+    setShippingAddress(prev => ({ ...prev, [field]: value }))
+  }
 
   useGSAP(() => {
     if (progressRef.current) {
@@ -63,7 +152,7 @@ export default function CheckoutPage() {
     }
   }, [step])
 
-  if (authLoading || !user) {
+  if (authLoading || !user || isLoadingData) {
     return <div className="min-h-[60vh] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gold" /></div>
   }
 
@@ -204,38 +293,82 @@ export default function CheckoutPage() {
 
             {/* Step 1: Shipping */}
             {step === 1 && (
-              <form onSubmit={handleNextStep} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <h2 className="text-2xl font-serif mb-6">Shipping Information</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input required id="fullName" value={shippingAddress.fullName} onChange={e => setShippingAddress({...shippingAddress, fullName: e.target.value})} />
+              <form onSubmit={handleNextStep} className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                
+                {/* Address Selection */}
+                {savedAddresses.length > 0 && (
+                  <div>
+                    <h2 className="text-2xl font-serif mb-4">Select Shipping Address</h2>
+                    <RadioGroup 
+                      value={selectedAddressId} 
+                      onValueChange={handleAddressSelect}
+                      className="grid gap-4"
+                    >
+                      {savedAddresses.map((addr) => (
+                        <div key={addr.id} className="flex items-start space-x-3 border p-4 rounded-lg bg-surface">
+                          <RadioGroupItem value={addr.id} id={`addr-${addr.id}`} className="mt-1" />
+                          <Label htmlFor={`addr-${addr.id}`} className="flex-1 cursor-pointer">
+                            <span className="block font-medium mb-1">
+                              {addr.full_name} 
+                              {addr.is_default && <span className="ml-2 text-[10px] bg-gold/10 text-gold px-2 py-0.5 rounded uppercase tracking-wider font-bold">Default</span>}
+                            </span>
+                            <span className="block text-muted-foreground font-normal leading-relaxed text-sm">
+                              {addr.address_line1} {addr.address_line2 ? `, ${addr.address_line2}` : ""} <br />
+                              {addr.city}, {addr.state} {addr.zip} <br />
+                              {addr.country}
+                            </span>
+                            {addr.phone && <span className="block mt-1 font-normal text-sm text-muted-foreground">Phone: {addr.phone}</span>}
+                          </Label>
+                        </div>
+                      ))}
+                      <div className="flex items-center space-x-3 border p-4 rounded-lg bg-surface ">
+                        <RadioGroupItem value="new" id="addr-new" />
+                        <Label htmlFor="addr-new" className="font-medium cursor-pointer flex-1 ">Use a new address</Label>
+                      </div>
+                    </RadioGroup>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input required type="email" id="email" value={shippingAddress.email} onChange={e => setShippingAddress({...shippingAddress, email: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input required id="phone" value={shippingAddress.phone} onChange={e => setShippingAddress({...shippingAddress, phone: e.target.value})} />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="addressLine1">Address Line 1</Label>
-                    <Input required id="addressLine1" value={shippingAddress.addressLine1} onChange={e => setShippingAddress({...shippingAddress, addressLine1: e.target.value})} />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input required id="city" value={shippingAddress.city} onChange={e => setShippingAddress({...shippingAddress, city: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state">State</Label>
-                    <Input required id="state" value={shippingAddress.state} onChange={e => setShippingAddress({...shippingAddress, state: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="zip">ZIP / Postal Code</Label>
-                    <Input required id="zip" value={shippingAddress.zip} onChange={e => setShippingAddress({...shippingAddress, zip: e.target.value})} />
+                )}
+
+                <div>
+                  <h2 className="text-xl font-serif mb-4">
+                    {savedAddresses.length > 0 && selectedAddressId !== "new" ? "Edit Selected Address for this order" : "Shipping Information"}
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName">Full Name</Label>
+                      <Input required id="fullName" value={shippingAddress.fullName} onChange={e => handleInputChange("fullName", e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input required type="email" id="email" value={shippingAddress.email} onChange={e => handleInputChange("email", e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone</Label>
+                      <Input required id="phone" value={shippingAddress.phone} onChange={e => handleInputChange("phone", e.target.value)} />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="addressLine1">Address Line 1</Label>
+                      <Input required id="addressLine1" value={shippingAddress.addressLine1} onChange={e => handleInputChange("addressLine1", e.target.value)} />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="addressLine2">Address Line 2 (Optional)</Label>
+                      <Input id="addressLine2" value={shippingAddress.addressLine2} onChange={e => handleInputChange("addressLine2", e.target.value)} />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="city">City</Label>
+                      <Input required id="city" value={shippingAddress.city} onChange={e => handleInputChange("city", e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="state">State</Label>
+                      <Input required id="state" value={shippingAddress.state} onChange={e => handleInputChange("state", e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="zip">ZIP / Postal Code</Label>
+                      <Input required id="zip" value={shippingAddress.zip} onChange={e => handleInputChange("zip", e.target.value)} />
+                    </div>
                   </div>
                 </div>
+
                 <Button type="submit" size="lg" className="w-full md:w-auto bg-gold text-black hover:bg-gold-bright mt-8">
                   Continue to Payment <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -277,6 +410,7 @@ export default function CheckoutPage() {
                       <p className="font-medium">{shippingAddress.fullName}</p>
                       <p>{shippingAddress.addressLine1}, {shippingAddress.city}</p>
                       <p>{shippingAddress.state} {shippingAddress.zip}</p>
+                      <p className="mt-1 text-muted-foreground">{shippingAddress.phone}</p>
                     </div>
                   </div>
                   <div className="flex justify-between pt-2">

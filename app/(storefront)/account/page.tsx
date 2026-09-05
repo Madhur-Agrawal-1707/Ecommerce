@@ -39,18 +39,18 @@ export default async function AccountPage() {
           </Link>
           
           {/* Addresses */}
-          <div className="p-6 border border-border rounded-md hover:border-gold transition-colors">
-            <h3 className="font-medium text-lg mb-2">Addresses</h3>
+          <Link href="/account/addresses" className="block p-6 border border-border rounded-md hover:border-gold transition-colors group">
+            <h3 className="font-medium text-lg mb-2 group-hover:text-gold transition-colors">Addresses</h3>
             <p className="text-sm text-muted-foreground mb-4">Manage your default shipping and billing addresses.</p>
-            <span className="text-sm text-gold">Coming soon</span>
-          </div>
+            <span className="text-sm text-gold font-medium">Manage Addresses &rarr;</span>
+          </Link>
 
           {/* Profile */}
-          <div className="p-6 border border-border rounded-md hover:border-gold transition-colors">
-            <h3 className="font-medium text-lg mb-2">Profile Details</h3>
+          <Link href="/account/profile" className="block p-6 border border-border rounded-md hover:border-gold transition-colors group">
+            <h3 className="font-medium text-lg mb-2 group-hover:text-gold transition-colors">Profile Details</h3>
             <p className="text-sm text-muted-foreground mb-4">Update your name, email, and password.</p>
-            <span className="text-sm text-gold">Coming soon</span>
-          </div>
+            <span className="text-sm text-gold font-medium">Edit Profile &rarr;</span>
+          </Link>
         </div>
       </div>
     </div>
